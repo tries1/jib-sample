@@ -1,0 +1,42 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.7.RELEASE'
+    id 'com.google.cloud.tools.jib' version '1.4.0'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.sample'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+task dockerLocalRun() {
+    doLast {
+        def imageName = "${project.name}:${project.version}"
+        def containerName = "jib-sample"
+
+        exec{ commandLine "docker", "stop", "${containerName}" }
+        exec{ commandLine "docker", "rm", "${containerName}" }
+        exec{ commandLine "docker", "run", "-d", "-p", "80:8080", "--name", "${containerName}", "${imageName}" }
+
+        println('\n도커 컨테이너 실행완료')
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+}
